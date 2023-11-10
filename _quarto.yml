@@ -1,5 +1,118 @@
 project:
-  title: "experienced-earthworm"
+  title: "Experienced Earthworm"
+  type: website
 
+  preview: 
+    port: 7777
+    browser: true
+    watch-inputs: false
+    navigate: true
 
+  render:
+    # Render all .qmd files
+    - "**/*.qmd"
 
+    # Don't render anything in the manuscript folder because otherwise all the 
+    # output gets placed in _site/ only, which is annoying. Instead this folder 
+    # needs to be rendered separately, and *before* the overall website project 
+    # (which is doable since this whole build process is orchestrated by targets)
+    - "!manuscript/"
+  
+  resources: 
+    # But *do* place the outputs from the manuscript in the rendered site folder
+    - "manuscript/output/"
+    - "manuscript/output-ms/"
+
+execute:
+  freeze: auto  # Re-render only when source changes
+
+bibliography: manuscript/references.json
+csl: manuscript/csl/chicago-author-date.csl
+
+website:
+  repo-url: "https://github.com/andrewheiss/experienced-earthworm"
+  repo-actions: [edit, issue]
+
+  page-navigation: true
+
+  navbar:
+    pinned: true
+    background: "#1D6996"
+    search: true
+    left:
+      - text: "Methods & Models"
+        file: notebook/marginal-means.qmd
+      - text: "Results"
+        file: notebook/results.qmd
+      - text: "Manuscript"
+        file: notebook/manuscript.qmd
+    
+    right:
+      - icon: github
+        aria-label: github
+        href: https://github.com/andrewheiss/experienced-earthworm
+  
+  sidebar:
+    - title: "Data"
+      style: docked
+      background: dark
+      contents:
+        - notebook/data.qmd
+        - notebook/data-final.qmd
+    
+    - title: "Methods & Models"
+      contents:
+        - section: "Methods"
+          contents:
+            - notebook/marginal-means.qmd
+        - section: "Model details"
+          contents:
+            - text: "Model definitions"
+              file: notebook/model-definitions.qmd
+            - text: "Model details"
+              file: notebook/model-details.qmd
+            - text: "Model diagnostics"
+              file: notebook/model-diagnostics.qmd
+
+    - title: "Results"
+      contents:
+        - notebook/results.qmd
+        - section: "Specific hypotheses"
+          contents:
+            - notebook/results-branding.qmd
+            - notebook/results-crackdown.qmd
+            - notebook/results-issue.qmd
+            - notebook/results-funding.qmd
+            - notebook/results-practices.qmd
+    
+    - title: "Manuscript"
+      contents:
+        - section: "Manuscript"
+          contents:
+            - notebook/manuscript.qmd
+    
+    - title: "Empty space lol"
+    
+  page-footer:
+    left: |
+      Content {{< iconify fa6-brands creative-commons >}} 2023 by Andrew Heiss<br>
+      All content licensed under a {{< iconify fa6-brands creative-commons >}}
+      {{< iconify fa6-brands creative-commons-by >}} 
+      [Creative Commons Attribution 4.0 International license (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/)
+    right: |
+      Made with {{< iconify fa6-brands r-project >}} and [Quarto](https://quarto.org/)<br>
+      [View the source at {{< iconify fa6-brands github >}} GitHub](https://github.com/andrewheiss/experienced-earthworm)
+
+format:
+  html:
+    theme:
+      - zephyr
+      - notebook/html/custom.scss
+    toc: true
+    toc-location: right
+    code-fold: true
+    code-tools: true
+    highlight-style: monokai
+
+language: 
+  title-block-published: "Date"
