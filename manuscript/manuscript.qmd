@@ -1,0 +1,409 @@
+---
+title: "Consultation, Co-Optation, and Crackdown"
+subtitle: "How Participation in Authoritarian-Dominated International Organizations Shapes Civil Society"
+short-title: "Consultation, Co-Optation, and Crackdown"
+date: "2023-11-09"
+author:
+- name: Andrew Heiss
+  affiliation: Georgia State University
+  url: https://www.andrewheiss.com/
+  email: aheiss@gsu.edu
+  orcid: 0000-0002-3948-3914
+abstract: |
+  A growing body of research currently demonstrates that state membership in authoritarian-dominated regional and international organizations (ROs and IOs) can weaken the prospects for political liberalization and can serve to bolster autocratic regime stability. Concurrently, over the past decade, the regulatory environment for nongovernmental organizations (NGOs) has become increasingly restricted, particularly in authoritarian regimes where autocrats wield anti-civil society regulations in order to maintain and increase regime stability. NGOs play an important role in international policymaking, often holding consultative or voting roles in various types of IOs. Given the increasing restriction of civil society in authoritarian states, what role do NGOs play in authoritarian-oriented IOs? In this paper, I explore two questions related to authoritarian stability, civil society, and international organizations: (1) how does membership in authoritarian IOs shape states’ domestic civil society regulations, and (2) how do states use NGOs in authoritarian IOs to protect and enhance regime stability? I explore these questions with cross-national quantitative data from the Varieties of Democracy project and two qualitative case studies of NGOs working with authoritarian IOs.
+keywords:
+  - civil society regulation
+  - international organizations
+  - authoritarianism
+code-repo: "Access the code, data, and analysis at <https://github.com/andrewheiss/experienced-earthworm>"
+bibliography: references.json
+link-citations: true
+---
+
+```{r setup, include=FALSE}
+if (is.null(knitr::pandoc_to())) {
+  fmt_out <- "interactive"
+} else {
+  fmt_out <- knitr::pandoc_to()
+}
+
+knitr::opts_chunk$set(
+  echo = FALSE, include = FALSE,
+  warning = FALSE, message = FALSE,
+  fig.align = "center", fig.retina = 3,
+  fig.width = 6, fig.height = (6 * 0.618),
+  out.width = "100%", collapse = TRUE
+)
+
+options(
+  digits = 3, width = 120,
+  dplyr.summarise.inform = FALSE,
+  knitr.kable.NA = ""
+)
+```
+
+```{r libraries-data}
+library(tidyverse)
+library(scales)
+library(tidybayes)
+library(brms)
+library(marginaleffects)
+library(targets)
+library(ggrepel)
+library(patchwork)
+
+tar_config_set(
+  store = here::here('_targets'),
+  script = here::here('_targets.R')
+)
+
+# Generated via random.org
+set.seed(581770)
+
+# Load targets 
+tar_load(vdem_clean)
+tar_load(c(m_cs_repression_1, m_ccsi_1, m_freeexp_1, m_civlib_1))
+
+clrs <- MoMAColors::moma.colors("ustwo")
+
+theme_ngo <- function() {
+  theme_minimal(base_family = "Mulish") +
+    theme(panel.grid.minor = element_blank(),
+      plot.background = element_rect(fill = "white", color = NA),
+      plot.title = element_text(face = "bold"),
+      axis.title = element_text(face = "bold"),
+      strip.text = element_text(face = "bold"),
+      strip.background = element_rect(fill = "grey80", color = NA),
+      legend.title = element_text(face = "bold"))
+}
+
+arab_league <- tribble(
+  ~country, ~signatory,
+  "Algeria", FALSE,
+  "Bahrain", FALSE,
+  "Comoros", FALSE,
+  "Djibouti", FALSE,
+  "Egypt", FALSE,
+  "Iraq", FALSE,
+  "Jordan", TRUE,
+  "Kuwait", FALSE,
+  "Lebanon", FALSE,
+  "Libya", FALSE,
+  "Mauritania", TRUE,
+  "Morocco", TRUE,
+  "Oman", FALSE,
+  "Palestine", TRUE,
+  "Qatar", FALSE,
+  "Saudi Arabia", FALSE,
+  "Somalia", FALSE,
+  "Sudan", TRUE,
+  "Syria", FALSE,
+  "Tunisia", TRUE,
+  "United Arab Emirates", FALSE,
+  "Yemen", FALSE
+) |> 
+  mutate(ccodecow = countrycode::countrycode(country, "country.name", "cown"))
+
+arab_league_vdem <- vdem_clean |> 
+  ungroup() |> 
+  filter(year > 2014) |> 
+  inner_join(arab_league, by = join_by(ccodecow)) |> 
+  drop_na(ccodecow) |> 
+  mutate(country = case_match(country, "United Arab Emirates" ~ "UAE", .default = country))
+
+arab_league_vdem_last <- arab_league_vdem |> 
+  filter(year == 2022, signatory == TRUE)
+```
+
+# Introduction
+
+::: {.callout-warning}
+## VERY MUCH A DRAFT
+
+Phew. This paper is *very much* a draft and a work in progress and (somewhat embarassingly) incomplete. But it should provide a solid overview of my overarching theory and some early attempts at testing and exploring that theory. I look forward to comments from the discussant and the panel!
+:::
+
+# Authoritarian institutional balancing and international organizations
+
+A rich literature in comparative politics explores how authoritarian regimes counterintuitively use democratic institutions for their own benefit and survival [@Kendall-TaylorFrantz:2014a; @Gandhi:2006; @GandhiPrzeworski:2007]. Authoritarian states hold elections [@LevitskyWay:2010] and allow international monitors to observe the process [@Kelley:2012], devolve power to independent judiciaries [@GinsburgMoustafa:2008], allow opposition parties in the legislature and set executive term limits [@Meng:2020]. They also permit the growth of domestic civil society and allow international NGOs to operate and often advocate for human rights reforms [@Heiss:2019; @Heiss:2019a; @YeHeiss:2023; @Heiss:2017]. Each of these democratic-appearing forms of institutionalization, however, are designed to keep the ruling party in power—institutions are kept weak and "dependent on the regime to ensure that they do not develop any real power or autonomy" [@FrantzEzrow:2011, 7]. 
+
+Authoritarian regimes also take this off-label approach to their participation in international and regional organizations.   For instance, repressive governments have increasingly become involved in multilateral organizations focused on human rights, environmental policies, good governance, and other contentious issues that often conflict with domestic policy goals. At a naive first glance, a dictatorship's participation in a human rights organization like the United Nations Human Rights Council (UNHRC) might appear like an embrace of reforms that might lead to improved domestic human rights. However, a growing body of work demonstrates that authoritarian states use international organizations as yet another strategy to shore up domestic stability and maintain regime longevity [@Cottiero:2021; @CottieroHaggard:2023; @Debre:2021; @Debre:2022; @ObydenkovaLibman:2019]. As more authoritarian states join international and regional organizations, they can reshape these organizations' agendas in their favor, pushing these IOs to refocus attention toward or away from different domestic human rights abuses in ways that help legitimate authoritarian rule [@CottieroHaggard:2023].
+
+For instance, @Hafner-BurtonPevehouseSchneider:2023 illustrate how corrupt autocratic states make international commitments to good governance reforms, but only within international organizations that have primarily authoritarian member states. These commitments, like the African Union's Convention on Preventing and Combating Corruption, are used "strategically to promote an autocratic agenda" [@Hafner-BurtonPevehouseSchneider:2023, 26] both internationally and domestically. Since the commitments are made on an international stage, they have a type of global seal of approval and provide reputational benefit for states. However, since the commitments are designed by largely authoritarian member states, these agreements are often filled with loopholes and mechanisms for avoiding enforcement. States can thus "uptake good governance talk but lessen any deep commitment to the norms" [@Hafner-BurtonPevehouseSchneider:2023, 1].
+
+More broadly, China and Russia have been at the forefront of the Like-Minded Group (LMG), a cohort of authoritarian UN member states that has strategically engaged with the UNHRC, the World Health Organization, Interpol, the Organization for Security and Cooperation in Europe (OSCE), and other human rights-focused regional and international organizations to reshape and constrain the international human rights system [@Inboden:2023]. LMG states have chipped away at longstanding human rights norms and have proposed parallel forms of human rights regimes that they can control. Authoritarian states can thus engage with the international system to improve stability at home and simultaneously reorganize it in a way that makes these institutions align more closely to their policy preferences.
+
+States are not the only actors that work within regional and international organizations—NGOs also play an important role in international policymaking, often holding consultative or voting roles in IOs. Even in cases where NGOs do not have direct voting rights in IOs, NGOs can wield power indirectly. For example, NGOs that receive official recognition consultative status in the United Nations Economic and Social Council (ECOSOC) can submit Universal Period Review (UPR) reports as part of the UN's official process for overseeing the human rights records of member nations. NGO representatives attend IO meetings, issue reports, and lobby IO officials for policy changes. More broadly, through their advocacy work, NGOs can reshape global human rights agendas [@KapsteinBusby:2013; @Carpenter:2014; @Wong:2012].
+
+Authoritarian states engage with these IO-affiliated NGOs as part of their larger strategy of interaction with the international system for domestic benefit. For instance, @Kelley:2012 argues that because election monitoring has become a global norm, governments—even those who fully intend on cheating and manipulating the election—permit and partner with election monitoring NGOs as a way of appearing credible and democratic to peer nations. To ensure that monitoring efforts do indeed improve the regime's reputation, authoritarian governments will try to circumvent international monitors or purposely invite friendly (or bribable) monitors to counterbalance more objective organizations. Because of this, election monitors can ultimately “contribute to the false legitimization of governments” [@Kelley:2012, 155]. These "zombie" election monitoring NGOs often partner with larger regional or international organizations like the African Union or Arab League, which lends further credence to their legitimacy [@BushPrather:2018; @DebreMorgenbesser:2017]. Authoritarian states thus leverage international organizations *and* NGOs to remain in power at home.
+
+The authoritarian embrace of NGOs at a global level conflicts with domestic trends in civil society regulations. Over the past decade, there has been an ongoing closing of civic space, or global crackdown on civil society [@ChristensenWeinstein:2013; @Chaudhry:2022; @ChaudhryHeiss:2018; @ChaudhryHeiss:2022a; @DupuyRonPrakash:2015; @DupuyRonPrakash:2016; @BakkeMitchellSmidt:2020; @FransenDupuyHinfelaar:2021]. Since 2013, more than 100 states have passed laws that restrict, repress, or shut down civil society [@ICNL:2021], and only 21% of countries had open and unrestricted civic space by 2021 [@ChaudhryHeiss:2022a; @CIVICUS:2021]. Authoritarian states increasingly curtail associational rights and shut down NGOs that might pose a threat to their power. However, as with other democratic-appearing institutions, authoritarians limit and engage with civil society in strategic ways [@Heiss:2017; @DeMattee:2019]. States will often be more lenient, open, and permissive with NGOs that fit with their policy preferences—such as organizations focused on humanitarian services and disaster relief—while imposing harsher restrictions on NGOs working on more contentious issues like human rights advocacy [@YeHeiss:2023; @Heiss:2017].
+
+
+# Theoretical framework
+
+The simultaneous embrace of global civil society and rejection of domestic civil society by authoritarian states creates a unique dynamic in international relations and comparative politics research. To help explore this relationship, I propose a framework for understanding the interplay between autocrats, international organizations, global civil society, and domestic civil society (see @fig-framework).
+
+```{r}
+#| label: fig-framework
+#| include: true
+#| fig-cap: "Framework illustrating two pathways for authoritarian states to shape their domestic policies: through domestic institutions and through work with international organizations and their consultative international NGOs"
+knitr::include_graphics("img/framework.png", auto_pdf = TRUE)
+```
+
+In this model, authoritarian states engage with their internal domestic institutions such as legislatures, judiciaries, civil society, and other democratic-appearing institutions in ways that are selective and typically adversarial. Following the literature on competitive authoritarianism discussed previously, domestic institutions are rivals and threats to regime power and must be offset in ways that delegate a modicum of authority while maintaining regime stability. The state uses these not-quite-democratic institutions to form laws and policies that insulate it from additional regime instability. 
+
+Conversely, authoritarian states engage with international organizations—particularly IOs that have an authoritarian nature already—in a more positive manner. In their special consultative role in regional and international organizations, INGOs become a possible target for cooperation or co-optation as well. When working internationally, authoritarian states can target IOs directly (as in the case of China, Russia, and the LMG and their efforts to reshape the international human right system by changing formal organization rules or establishing parallel agencies) or they can target the consultative international NGOs (as in the case of "zombie" election monitoring organizations). States work to ensure that policy recommendations from the international arena—from work either with IOs or INGOs—are beneficial to the ruling regime.
+
+In this paper, I test elements of this framework by exploring two questions related to authoritarian stability, civil society, and international organizations: (1) how does membership in authoritarian IOs shape states’ domestic civil society regulations, and (2) how do states use NGOs in authoritarian IOs to protect and enhance regime stability. I propose that NGOs and international civil society more broadly are another strategy in authoritarian stability-seeking calculus. Authoritarian state interactions with IOs and international NGOs shape their approach to domestic policies. @CottieroHaggard:2023 demonstrate that increased involvement in authoritarian-dominated IOs leads to reduced democratic institutionalization at home. I argue that a similar mechanism shapes more specific policies, particularly states' approaches to regulating and repressing domestic civil society. Many of the issues addressed by IOs and INGOs relate to human rights, anti-corruption, good governance, and other more contentious issues that are typically taken up by advocacy organizations. If authoritarian states distort these policies, though, as they do with domestic institutions, we would expect to see a worsening of the general civil society and human rights legal environment as states engage with more authoritarian IOs.
+
+I examine these questions with cross-national quantitative data from the Varieties of Democracy project and two qualitative case studies of authoritarian states, authoritarian IOs, and international NGOs working together.
+
+
+# Domestic civil society repression and authoritarian international organizations
+
+::: {.callout-warning}
+## Unfinished!
+
+I've got all sorts of stats-y detail to include here, like the identification strategy, modeling strategy, covariates and confounders included, Bayesian modeling details, and so on, but that's all unfinished for now. 
+
+Instead, I'll show the main results, because those are interesting. I'm more than happy to discuss the technical details later though!
+
+The general idea here is that more involvement with authoritarian IOs leads to worse civil society at home, measured as civil society repression, the general civil society environment, media freedom, and general human rights.
+:::
+
+- **Data**: V-Dem, all authoritarian countries from 1950–2010
+- **Outcome variables**: civil society repression (`v2csreprss`), civil society environment (`v2xcs_ccsi`), freedom of expression index (`v2x_freexp_altinf`), civil liberties index (`v2x_civlib`); all leaded one year + separated into annual changes in values instead of complete value
+- **Key treatment variable**: average polyarchy score of all international organization memberships (via @CottieroHaggard:2023)
+- **Control variables / confounders**: log GDP per capita, percent change in GDP, outcome variable in previous year, polyarchy, elected official index, direct popular vote index, equal protection index, political corruption index, physical violence index, count of IO memberships with China, count of IO memberships with Russia, indicator for whether the country faces violent conflict, indicator for whether the year is 1989 or earlier
+- **Modeling strategy**: multilevel Bayesian model with random country intercepts, random year slopes, and a linear year trend (i.e. `y ~ x + ... + year + (1 + year | country)`)
+
+
+```{r}
+#| label: fig-mfx
+#| fig-width: 6
+#| fig-height: 3.5
+#| out-width: "75%"
+#| include: true
+#| fig-cap: "Posterior marginal effects of annual changes in civil society outcomes associated with a one-unit increase in IO membership authoritarian-ness. Point represents posterior median; lines represent 80% and 95% credible intervals. In all cases the slope is negative and has a 100% posterior probability of being less than zero."
+posterior_coefs <- bind_rows(
+  m_cs_repression_1 = m_cs_repression_1 |> 
+    gather_draws(b_negriovmean) |> 
+    mutate(model_nice = "Civil society repression"),
+  m_ccsi_1 = m_ccsi_1 |> 
+    gather_draws(b_negriovmean) |> 
+    mutate(model_nice = "Civil society legal environment"),
+  m_freeexp_1 = m_freeexp_1 |> 
+    gather_draws(b_negriovmean) |> 
+    mutate(model_nice = "Freedom of expression"),
+  m_civlib_1 = m_civlib_1 |> 
+    gather_draws(b_negriovmean) |> 
+    mutate(model_nice = "Civil liberties"),
+  .id = "model"
+) |> 
+  mutate(model_nice = fct_rev(fct_inorder(model_nice)))
+
+posterior_coefs |> 
+  ggplot(aes(x = .value, y = model_nice, fill = model_nice)) +
+  stat_halfeye(.width = c(0.8, 0.95)) +
+  scale_fill_manual(values = clrs[c(5, 6, 3, 1)], guide = "none") +
+  geom_vline(xintercept = 0, color = clrs[4], linewidth = 0.5) +
+  scale_x_continuous(labels = label_comma(style_negative = "minus")) +
+  labs(
+    x = "Average annual change in outcome",
+    y = NULL,
+    title = "Posterior marginal effects"
+  ) +
+  theme_ngo()
+```
+
+
+
+
+
+```{r}
+#| label: fig-preds-cs-repression
+#| fig-width: 9
+#| fig-height: 3.5
+#| include: true
+#| fig-cap: "Posterior predictions of annual changes in civil society repression and the core civil society index across possible values of aggregate IO membership authoritarian-ness. Line represents posterior median; shaded areas represent 50%, 80%, and 95% credible intervals. In both cases, civil society worsens as states join more authoritarian IOs."
+p1 <- m_cs_repression_1 |> 
+  epred_draws(newdata = datagrid(model = m_cs_repression_1, negriovmean = seq(-10, 0))) |> 
+  ggplot(aes(x = negriovmean, y = .epred)) +
+  stat_lineribbon(color = clrs[1]) +
+  geom_hline(yintercept = 0, color = clrs[4], linewidth = 0.5) +
+  annotate(geom = "text", x = -10, y = -0.15, label = "Least autocratic", size = 3, hjust = 0, family = "Mulish", fontface = "italic") +
+  annotate(geom = "text", x = 0, y = -0.15, label = "Most autocratic", size = 3, hjust = 1, family = "Mulish", fontface = "italic") +
+  annotate(geom = "text", x = -10.75, y = -0.1, label = "Civil society\nworsening", size = 3, hjust = 0.5, family = "Mulish", angle = 90, lineheight = 0.8, fontface = "italic") +
+  annotate(geom = "text", x = -10.75, y = 0.25, label = "Civil society\nimproving", size = 3, hjust = 0.5, family = "Mulish", angle = 90, lineheight = 0.8, fontface = "italic") +
+  scale_x_continuous(breaks = seq(-10, 0, 2), labels = label_comma(style_negative = "minus")) +
+  scale_y_continuous(labels = label_comma(style_negative = "minus")) +
+  scale_fill_manual(
+    values = colorspace::lighten(clrs[1], amount = c(0.75, 0.5, 0.25)),
+    guide = "none"
+  ) +
+  # coord_cartesian(ylim = c(-0.1, 0.1)) +
+  labs(
+    x = "Average authoritarian-ness of\ninternational organization memberships",
+    y = "Average annual change in\ncivil society repression",
+    title = "Civil society repression"
+  ) +
+  theme_ngo()
+
+p2 <- m_ccsi_1 |> 
+  epred_draws(newdata = datagrid(model = m_ccsi_1, negriovmean = seq(-10, 0))) |> 
+  ggplot(aes(x = negriovmean, y = .epred)) +
+  stat_lineribbon(color = clrs[3]) +
+  geom_hline(yintercept = 0, color = clrs[4], linewidth = 0.5) +
+  annotate(geom = "text", x = -10, y = -0.15, label = "Least autocratic", size = 3, hjust = 0, family = "Mulish", fontface = "italic") +
+  annotate(geom = "text", x = 0, y = -0.15, label = "Most autocratic", size = 3, hjust = 1, family = "Mulish", fontface = "italic") +
+  annotate(geom = "text", x = -10.75, y = -0.07, label = "Civil society\nworsening", size = 3, hjust = 0.5, family = "Mulish", angle = 90, lineheight = 0.8, fontface = "italic") +
+  annotate(geom = "text", x = -10.75, y = 0.07, label = "Civil society\nimproving", size = 3, hjust = 0.5, family = "Mulish", angle = 90, lineheight = 0.8, fontface = "italic") +
+  scale_x_continuous(breaks = seq(-10, 0, 2), labels = label_comma(style_negative = "minus")) +
+  scale_y_continuous(labels = label_comma(style_negative = "minus")) +
+  scale_fill_manual(
+    values = colorspace::lighten(clrs[3], amount = c(0.75, 0.5, 0.25)),
+    guide = "none"
+  ) +
+  coord_cartesian(ylim = c(-0.1, 0.1)) +
+  labs(
+    x = "Average authoritarian-ness of\ninternational organization memberships",
+    y = "Average annual change in\ncivil society index",
+    title = "Civil society legal environment"
+  ) +
+  theme_ngo()
+
+p1 | p2
+```
+
+
+```{r}
+#| label: fig-preds-other-cs
+#| fig-width: 9
+#| fig-height: 3.5
+#| include: true
+#| fig-cap: "Posterior predictions of annual changes in freedom of expression index and civil liberties index across possible values of aggregate IO membership authoritarian-ness. Line represents posterior median; shaded areas represent 50%, 80%, and 95% credible intervals. Both indices worsen as states join more authoritarian IOs."
+p1 <- m_freeexp_1 |> 
+  epred_draws(newdata = datagrid(model = m_freeexp_1, negriovmean = seq(-10, 0))) |> 
+  ggplot(aes(x = negriovmean, y = .epred)) +
+  stat_lineribbon(color = clrs[6]) +
+  geom_hline(yintercept = 0, color = clrs[4], linewidth = 0.5) +
+  annotate(geom = "text", x = -10, y = -0.15, label = "Least autocratic", size = 3, hjust = 0, family = "Mulish", fontface = "italic") +
+  annotate(geom = "text", x = 0, y = -0.15, label = "Most autocratic", size = 3, hjust = 1, family = "Mulish", fontface = "italic") +
+  annotate(geom = "text", x = -10.75, y = -0.07, label = "Freedom of\nexpression\nworsening", size = 3, hjust = 0.5, family = "Mulish", angle = 90, lineheight = 0.8, fontface = "italic") +
+  annotate(geom = "text", x = -10.75, y = 0.07, label = "Freedom of\nexpression\nimproving", size = 3, hjust = 0.5, family = "Mulish", angle = 90, lineheight = 0.8, fontface = "italic") +
+  scale_x_continuous(breaks = seq(-10, 0, 2), labels = label_comma(style_negative = "minus")) +
+  scale_y_continuous(labels = label_comma(style_negative = "minus")) +
+  scale_fill_manual(
+    values = colorspace::lighten(clrs[6], amount = c(0.75, 0.5, 0.25)),
+    guide = "none"
+  ) +
+  coord_cartesian(ylim = c(-0.1, 0.1)) +
+  labs(
+    x = "Average authoritarian-ness of\ninternational organization memberships",
+    y = "Average annual change in\nfreedom of expression index",
+    title = "Freedom of expression"
+  ) +
+  theme_ngo()
+
+p2 <- m_civlib_1 |> 
+  epred_draws(newdata = datagrid(model = m_civlib_1, negriovmean = seq(-10, 0))) |> 
+  ggplot(aes(x = negriovmean, y = .epred)) +
+  stat_lineribbon(color = clrs[5]) +
+  geom_hline(yintercept = 0, color = clrs[4], linewidth = 0.5) +
+  annotate(geom = "text", x = -10, y = -0.15, label = "Least autocratic", size = 3, hjust = 0, family = "Mulish", fontface = "italic") +
+  annotate(geom = "text", x = 0, y = -0.15, label = "Most autocratic", size = 3, hjust = 1, family = "Mulish", fontface = "italic") +
+  annotate(geom = "text", x = -10.75, y = -0.07, label = "Civil liberties\nworsening", size = 3, hjust = 0.5, family = "Mulish", angle = 90, lineheight = 0.8, fontface = "italic") +
+  annotate(geom = "text", x = -10.75, y = 0.07, label = "Civil liberties\nimproving", size = 3, hjust = 0.5, family = "Mulish", angle = 90, lineheight = 0.8, fontface = "italic") +
+  scale_x_continuous(breaks = seq(-10, 0, 2), labels = label_comma(style_negative = "minus")) +
+  scale_y_continuous(labels = label_comma(style_negative = "minus")) +
+  scale_fill_manual(
+    values = colorspace::lighten(clrs[5], amount = c(0.75, 0.5, 0.25)),
+    guide = "none"
+  ) +
+  coord_cartesian(ylim = c(-0.1, 0.1)) +
+  labs(
+    x = "Average authoritarian-ness of\ninternational organization memberships",
+    y = "Average annual change in\ncivil liberties index",
+    title = "Civil liberties"
+  ) +
+  theme_ngo()
+
+p1 | p2
+```
+
+
+# Strategic engagement with international civil society within authoritarian international organizations
+
+While data sources like V-Dem provide rich quantitative indicators related to democratization and civil society at a domestic level within states, and while the groundbreaking work of @CottieroHaggard:2023 provides early measures of the authoritarian nature of international and regional organizations, there is far less data about NGO involvement in these IOs. Moreover, state interactions with NGOs and IOs is far less documented and largely unobservable, making it difficult to explore at a large scale. Instead, careful qualitative and investigative work is required to uncover the connections between states, NGOs, and IOs.
+
+To explore the second mechanism of my theoretical framework—how authoritarian states bolster their domestic stability by turning to NGOs that work with international or regional organizations—I look at two representative case studies. In each case, authoritarian states that restrict civil society domestically engaged positively with well-connected and well-respected international NGOs through selective partnerships with regional organizations. States used their work with NGOs within these regional organizations to push for democratic-appearing policy reforms, which subsequently opened additional avenues for increased domestic repression of civil society.
+
+## IFJ and the Arab League
+
+Founded in 1926, the International Federation of Journalists (IFJ) is perhaps the largest and oldest NGO focused on media freedom and journalist protection. Unlike other prominent media rights NGOs like Article 19, Index on Censorship, and International PEN, which pattern themselves after human rights organizations like Amnesty International and address specific violations of freedom of expression and censorship, IFJ positions itself as the "global voice of journalists" and partners with journalistic trade unions in 140 different countries. As a result, it claims to represent 600,000 journalists worldwide [@IFJ:2023].
+
+IFJ is affiliated with the United Nations system and other international and regional organizations. Since 1953, it has maintained ECOSOC consultative status, which has allowed it to lobby for policy changes within the UN system. Both on its own and through partnerships with other media-focused INGOs, IFJ regularly submits Universal Periodic Review (UPR) reports to call out states that repress freedom of expression and violate other human rights. `TODO: Count of IFJ-sponsored UPR reports?`
+
+In October 2014, following the tumultuous Arab uprisings, IFJ spearheaded a conference in Casablanca, Morocco, with the intention of drafting a blueprint for strengthening protections for freedom of expression in the region [@IFJ:2014]. With the support of the Moroccan government and other Arab League member nations, IFJ partnered with the Federation of Arab Journalists (FAJ), an umbrella organization representing journalists within the Arab League (and that has often collaborated with repressive regimes; see @AhramOnline:2023 for an example). Following the conference, IFJ and FAJ worked together to draft a declaration of media freedom for the Arab world that included a set of core principles of journalistic and media rights, as well as a proposal for a legal mechanism to address violations of those rights using formal institutions within the Arab League.
+
+Surprisingly, however, there was substantial opposition to the draft declaration from media freedom advocates. 28 prominent freedom of expression advocacy NGOs from across the region—including the Cairo Institute for Human Right Studies, the Egypt-based Arabic Network for Human Rights Information in Egypt, the Moroccan Association for Investigative Journalism, the Moroccan Association for Human Rights, the Tunisian Human Rights League, the Gulf Center for Human Rights, among others—as well as IFEX, an international coalition of media-focused advocacy NGOs, publicly opposed the declaration and called for substantial changes to its proposed policies [@CIHRS:2016; @SMEXIFEX:2016]. The key issue driving the opposition was that the declaration gave final enforcement authority to the Arab League and its member states, which they argued would only meet regime needs. The opposing NGOs argued that "assigning this [enforcement] mechanism within the Arab League would mean that it will be controlled and directed by Arab governments to serve their policies, often characterized by repression and persecution," and that, accordingly, expression rights would not be protected [@SMEXIFEX:2016].
+
+Despite these concerns, the Declaration on Media Freedom in the Arab World was formally adopted in May 2016 in Casablanca [@IFJ:2018]. In the subsequent months, several Arab states—many of which were indirectly involved in the drafting of the Declaration—signed and adopted the principles. For instance, in May 2017, IFJ hosted a signing ceremony in Morocco with members of civil society—representatives from the country's national human rights council (Conseil national des droits de l’homme), and the country's national press syndicate (Syndicat national de la presse marocaine)—as well as key members of the Moroccan parliament, including leadership from nearly all political parties [@IFJ:2017]. Reforms initiated by global civil society, in conjunction with the Arab League, were thus adopted as domestic policy priorities in an authoritarian state. 
+
+```{r}
+#| label: fig-declaration-states
+#| include: true
+#| fig-width: 9
+#| fig-height: 3.5
+#| fig-cap: "Trends in respect for freedom of expression rights and the overall environment for civil society following the adoption of the Declaration on Media Freedom in the Arab World in 2016. Formal signatory countries highlighted with thicker lines; thinner lines represent other League of Arab Nations member states."
+p1 <- ggplot(arab_league_vdem, aes(x = year, y = v2x_freexp_altinf, color = signatory)) +
+  geom_line(aes(group = country, linewidth = signatory)) +
+  geom_text(data = arab_league_vdem_last, aes(label = country), nudge_x = 0.15, hjust = 0, family = "Mulish", fontface = "bold") +
+  geom_vline(xintercept = 2016) +
+  scale_color_manual(values = c("grey50", clrs[1]), guide = "none") +
+  scale_linewidth_manual(values = c(0.25, 0.75), guide = "none") +
+  coord_cartesian(xlim = c(2015, 2024)) +
+  labs(
+    x = NULL, y = "V-Dem Freedom of Expression index",
+    title = "Domestic freedom of expression"
+  ) +
+  theme_ngo()
+
+p2 <- ggplot(arab_league_vdem, aes(x = year, y = v2xcs_ccsi, color = signatory)) +
+  geom_line(aes(group = country, linewidth = signatory)) +
+  geom_text_repel(data = arab_league_vdem_last, aes(label = country), nudge_x = 0.15, hjust = 0, direction = "y", seed = 123, family = "Mulish", fontface = "bold") +
+  geom_vline(xintercept = 2016) +
+  scale_color_manual(values = c("grey50", clrs[6]), guide = "none") +
+  scale_linewidth_manual(values = c(0.25, 0.75), guide = "none") +
+  coord_cartesian(xlim = c(2015, 2024)) +
+  labs(
+    x = NULL, y = "V-Dem Core Civil Society index",
+    title = "Domestic civil society"
+  ) +
+  theme_ngo()
+
+p1 | p2
+```
+
+The principles and mechanisms in the Declaration—crafted by INGOs like IFJ and FAJ with the support of the Arab League—ostensibly limit Arab states' ability to repress media freedom domestically by providing protections for journalists and creating formal legal mechanisms for enforcing those rights. These states willingly signed the Declaration to arguably constrain themselves against future repression [see @Meng:2020]. But they did so in a way that actually has not imposed any actual constraints. With the exception of Sudan, press freedom has remained stagnant or has declined in the Arab League states that have officially signed the Declaration (Palestine, Tunisia, Jordan, Sudan, Morocco and Mauritania), and these trends align with non-signatory states, and general civil society openness has decreased in most states as well. (see @fig-declaration-states). The special reporting and enforcement mechanism has not been used, and IFJ continues to call on Arab League states to join the declaration and respect its guidelines [@IFJ:2019]. Signatory states appear to have benefited from the positive press both internationally and domestically and were able to rely on the Arab League to defang the enforcement mechanism and bring it under their (indirect) control.
+
+## Sportswashing in the GCC through FIFA and the IOC
+
+::: {.callout-warning}
+### TODO
+
+Similar story that illustrates the same mechanisms with sportswashing with FIFA + the GCC + individual Gulf states during the 2022 Qatar World Cup
+:::
+
+
+# Conclusion
+
+::: {.callout-warning}
+### Surprise! Also not finished!
+
+Future research - there are multiple pathways; why go through the effort of working through an AIO and its NGOs instead of just working domestically? What determines when a regime will go internationally instead of domestically?
+:::
+
+
+# References
