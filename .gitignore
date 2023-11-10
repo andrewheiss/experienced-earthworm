@@ -10,13 +10,6 @@
 _site/
 _freeze/
 manuscript/output/
-
-*.pdf
-*.html
-*.docx
-*.odt
-*.log
-*.aux
 manuscript/manuscript.tex
 
 # Targets stuff
