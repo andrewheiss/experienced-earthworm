@@ -12,7 +12,8 @@ options(
 suppressPackageStartupMessages(library(brms))
 options(
   mc.cores = 4,
-  brms.backend = "cmdstanr"
+  brms.backend = "cmdstanr",
+  brms.threads = 2
 )
 
 set.seed(202228)  # From random.org
@@ -54,5 +55,12 @@ list(
   tar_target(skeleton, create_panel_skeleton(cottiero_haggard_clean)),
   
   tar_target(final_data, make_final_data(skeleton, cottiero_haggard_clean, vdem_clean)),
+  
+  ## Models ----
+  tar_target(m_cs_repression_1, f_cs_repression_1(final_data)),
+  tar_target(m_ccsi_1, f_ccsi_1(final_data)),
+  tar_target(m_freeexp_1, f_freeexp_1(final_data)),
+  tar_target(m_civlib_1, f_civlib_1(final_data)),
+
   NULL
 )
