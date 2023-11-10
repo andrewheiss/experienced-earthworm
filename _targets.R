@@ -55,6 +55,12 @@ list(
   tar_target(skeleton, create_panel_skeleton(cottiero_haggard_clean)),
   
   tar_target(final_data, make_final_data(skeleton, cottiero_haggard_clean, vdem_clean)),
+
+  ## Graphics ----
+  tar_target(swatches, make_adobe_swatches(
+    here_rel("manuscript", "assets", "ustwo.ase")), 
+    format = "file"
+  ),
   
   ## Models ----
   tar_target(m_cs_repression_1, f_cs_repression_1(final_data)),
