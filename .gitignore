@@ -6,11 +6,19 @@
 
 # Quarto stuff
 /.quarto/
+/.luarc.json
 **/*_cache/*
 _site/
 _freeze/
 manuscript/output/
 manuscript/manuscript.tex
+manuscript/submissions/
+*.ent
+manuscript/*_files/
+manuscript/*.html.md
+manuscript/*.pdf.md
+manuscript/*.docx.md
+manuscript/*.odt.md
 
 # Targets stuff
 _targets
@@ -20,5 +28,3 @@ _targets.yaml
 data/raw_data/
 data/manual_data/
 data/derived_data/
-
-/.luarc.json
