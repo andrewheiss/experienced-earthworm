@@ -2,7 +2,7 @@
 title: "Consultation, Co-Optation, and Crackdown"
 subtitle: "How Participation in Authoritarian-Dominated International Organizations Shapes Civil Society"
 short-title: "Consultation, Co-Optation, and Crackdown"
-date: "2023-11-09"
+date: "2025-09-05"
 author:
 - name: Andrew Heiss
   affiliation: Georgia State University
@@ -20,7 +20,10 @@ bibliography: references.json
 link-citations: true
 ---
 
-```{r setup, include=FALSE}
+```{r}
+#| label: setup
+#| include: false
+
 if (is.null(knitr::pandoc_to())) {
   fmt_out <- "interactive"
 } else {
@@ -42,7 +45,9 @@ options(
 )
 ```
 
-```{r libraries-data}
+```{r}
+#| label: libraries-data
+
 library(tidyverse)
 library(scales)
 library(tidybayes)
@@ -120,7 +125,7 @@ arab_league_vdem_last <- arab_league_vdem |>
 ::: {.callout-warning}
 ## VERY MUCH A DRAFT
 
-Phew. This paper is *very much* a draft and a work in progress and (somewhat embarassingly) incomplete. But it should provide a solid overview of my overarching theory and some early attempts at testing and exploring that theory. I look forward to comments from the discussant and the panel!
+Phew. This paper is *very much* a draft and a work in progress and (somewhat embarassingly) incomplete. But it should provide a solid overview of my overarching theory and some early attempts at testing and exploring that theory. I look forward to comments from everyone!
 :::
 
 # Authoritarian institutional balancing and international organizations
@@ -137,7 +142,7 @@ States are not the only actors that work within regional and international organ
 
 Authoritarian states engage with these IO-affiliated NGOs as part of their larger strategy of interaction with the international system for domestic benefit. For instance, @Kelley:2012 argues that because election monitoring has become a global norm, governments—even those who fully intend on cheating and manipulating the election—permit and partner with election monitoring NGOs as a way of appearing credible and democratic to peer nations. To ensure that monitoring efforts do indeed improve the regime's reputation, authoritarian governments will try to circumvent international monitors or purposely invite friendly (or bribable) monitors to counterbalance more objective organizations. Because of this, election monitors can ultimately “contribute to the false legitimization of governments” [@Kelley:2012, 155]. These "zombie" election monitoring NGOs often partner with larger regional or international organizations like the African Union or Arab League, which lends further credence to their legitimacy [@BushPrather:2018; @DebreMorgenbesser:2017]. Authoritarian states thus leverage international organizations *and* NGOs to remain in power at home.
 
-The authoritarian embrace of NGOs at a global level conflicts with domestic trends in civil society regulations. Over the past decade, there has been an ongoing closing of civic space, or global crackdown on civil society [@ChristensenWeinstein:2013; @Chaudhry:2022; @ChaudhryHeiss:2018; @ChaudhryHeiss:2022a; @DupuyRonPrakash:2015; @DupuyRonPrakash:2016; @BakkeMitchellSmidt:2020; @FransenDupuyHinfelaar:2021]. Since 2013, more than 100 states have passed laws that restrict, repress, or shut down civil society [@ICNL:2021], and only 21% of countries had open and unrestricted civic space by 2021 [@ChaudhryHeiss:2022a; @CIVICUS:2021]. Authoritarian states increasingly curtail associational rights and shut down NGOs that might pose a threat to their power. However, as with other democratic-appearing institutions, authoritarians limit and engage with civil society in strategic ways [@Heiss:2017; @DeMattee:2019]. States will often be more lenient, open, and permissive with NGOs that fit with their policy preferences—such as organizations focused on humanitarian services and disaster relief—while imposing harsher restrictions on NGOs working on more contentious issues like human rights advocacy [@YeHeiss:2023; @Heiss:2017].
+The authoritarian embrace of NGOs at a global level conflicts with domestic trends in civil society regulations. Over the past decade, there has been an ongoing closing of civic space, or global crackdown on civil society [@ChristensenWeinstein:2013; @Chaudhry:2022; @ChaudhryHeiss:2018; @ChaudhryHeiss:2022a; @DupuyRonPrakash:2015; @DupuyRonPrakash:2016; @BakkeMitchellSmidt:2020; @FransenDupuyHinfelaar:2021]. Since 2013, more than 100 states have passed laws that restrict, repress, or shut down civil society [@ICNL:2021], and only 21% of countries had open and unrestricted civic space by 2021 [@ChaudhryHeiss:2022a; @CIVICUSMonitor]. Authoritarian states increasingly curtail associational rights and shut down NGOs that might pose a threat to their power. However, as with other democratic-appearing institutions, authoritarians limit and engage with civil society in strategic ways [@Heiss:2017; @DeMattee:2019]. States will often be more lenient, open, and permissive with NGOs that fit with their policy preferences—such as organizations focused on humanitarian services and disaster relief—while imposing harsher restrictions on NGOs working on more contentious issues like human rights advocacy [@YeHeiss:2023; @Heiss:2017].
 
 
 # Theoretical framework
