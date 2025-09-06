@@ -1,0 +1,27 @@
+---
+title: "Consultation, Co-Optation, and Crackdown"
+subtitle: "How Participation in Authoritarian-Dominated International Organizations Shapes Civil Society"
+author: "Andrew Heiss"
+format:
+  html:
+    code-tools: false
+    toc: false
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+yaml_metadata <- rmarkdown::yaml_front_matter(here::here("manuscript", "manuscript.qmd"))
+title <- yaml_metadata$title
+subtitle <- yaml_metadata$subtitle
+abstract <- yaml_metadata$abstract
+```
+
+## Abstract
+
+`r abstract`
+
+## Code
+
+All the raw code and data for this paper is available in a [GitHub repository](https://github.com/andrewheiss/experienced-earthworm).

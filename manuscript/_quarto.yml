@@ -31,7 +31,7 @@ format:
     shift-heading-level-by: 1
     theme:
       - zephyr
-      - html/custom.scss
+      - ../notebook/html/custom.scss
 
     citeproc: false
     filters:

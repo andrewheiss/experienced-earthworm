@@ -17,7 +17,7 @@ project:
     # needs to be rendered separately, and *before* the overall website project 
     # (which is doable since this whole build process is orchestrated by targets)
     - "!manuscript/"
-  
+
   resources: 
     # But *do* place the outputs from the manuscript in the rendered site folder
     - "manuscript/output/"
@@ -31,27 +31,24 @@ csl: manuscript/csl/chicago-author-date.csl
 
 website:
   repo-url: "https://github.com/andrewheiss/experienced-earthworm"
-  repo-actions: [edit, issue]
+  repo-actions: [source, issue]
 
   page-navigation: true
+  bread-crumbs: false
 
   navbar:
     pinned: true
-    background: "#1D6996"
+    background: primary
     search: true
     left:
-      - text: "Methods & Models"
-        file: notebook/marginal-means.qmd
-      - text: "Results"
-        file: notebook/results.qmd
       - text: "Manuscript"
         file: notebook/manuscript.qmd
-    
+
     right:
       - icon: github
         aria-label: github
         href: https://github.com/andrewheiss/experienced-earthworm
-  
+ 
   sidebar:
     - title: "Data"
       style: docked
@@ -59,49 +56,24 @@ website:
       contents:
         - notebook/data.qmd
         - notebook/data-final.qmd
-    
-    - title: "Methods & Models"
-      contents:
-        - section: "Methods"
-          contents:
-            - notebook/marginal-means.qmd
-        - section: "Model details"
-          contents:
-            - text: "Model definitions"
-              file: notebook/model-definitions.qmd
-            - text: "Model details"
-              file: notebook/model-details.qmd
-            - text: "Model diagnostics"
-              file: notebook/model-diagnostics.qmd
 
-    - title: "Results"
-      contents:
-        - notebook/results.qmd
-        - section: "Specific hypotheses"
-          contents:
-            - notebook/results-branding.qmd
-            - notebook/results-crackdown.qmd
-            - notebook/results-issue.qmd
-            - notebook/results-funding.qmd
-            - notebook/results-practices.qmd
-    
     - title: "Manuscript"
       contents:
         - section: "Manuscript"
           contents:
             - notebook/manuscript.qmd
-    
+
     - title: "Empty space lol"
-    
+
   page-footer:
     left: |
-      Content {{< iconify fa6-brands creative-commons >}} 2023 by Andrew Heiss<br>
-      All content licensed under a {{< iconify fa6-brands creative-commons >}}
-      {{< iconify fa6-brands creative-commons-by >}} 
+      Content {{< fa brands creative-commons >}} 2025 by Andrew Heiss<br>
+      All content licensed under a {{< fa brands creative-commons >}}
+      {{< fa brands creative-commons-by >}} 
       [Creative Commons Attribution 4.0 International license (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/)
     right: |
-      Made with {{< iconify fa6-brands r-project >}} and [Quarto](https://quarto.org/)<br>
-      [View the source at {{< iconify fa6-brands github >}} GitHub](https://github.com/andrewheiss/experienced-earthworm)
+      Made with {{< fa brands r-project >}} and [Quarto](https://quarto.org/)<br>
+      [View the source at {{< fa brands github >}} GitHub](https://github.com/andrewheiss/experienced-earthworm)
 
 format:
   html:

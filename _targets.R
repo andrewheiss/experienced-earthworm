@@ -76,8 +76,8 @@ list(
   tar_target(m_civlib_1, f_civlib_1(final_data)),
 
   ## Manuscript and notebook ----
-  # tar_quarto(manuscript, path = "manuscript", quiet = FALSE),
-  # tar_quarto(website, path = ".", quiet = FALSE),
+  tar_quarto(manuscript, path = "manuscript", working_directory = "manuscript", quiet = FALSE),
+  tar_quarto(website, path = ".", quiet = FALSE),
   # tar_target(deploy_script, here_rel("deploy.sh"), format = "file"),
   # tar_target(deploy, {
   #   # Force a dependency

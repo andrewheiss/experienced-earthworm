@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,100..900;1,100..900&family=Mulish:ital,wght@0,200..1000;1,200..1000&display=swap');
+
+/*-- scss:defaults --*/
+// Colors from MoMAColors::moma.colors("ustwo"), supplemented with CARTOColors (Prism)
+$white:    #fff !default;
+$gray-100: #f8f9fa !default;
+$gray-200: #e9ecef !default;
+$gray-300: #dee2e6 !default;
+$gray-400: #ced4da !default;
+$gray-500: #adb5bd !default;
+$gray-600: #6c757d !default;
+$gray-700: #495057 !default;
+$gray-800: #343a40 !default;
+$gray-900: #212529 !default;
+$black:    #000 !default;
+
+$blue:    #008d98 !default;  // ustwo
+$indigo:  #5F4690 !default;  // Prism
+$purple:  #994E95 !default;  // Prism
+$pink:    #f06a63 !default;  // ustwo
+$red:     #d7433b !default;  // ustwo
+$orange:  #ff8e5e !default;  // ustwo
+$yellow:  #ffcc3d !default;  // ustwo
+$green:   #0F8554 !default;  // Prism
+$teal:    #38A6A5 !default;  // Prism
+$cyan:    #95caa6 !default;  // ustwo
+
+$primary:       $red !default;
+$secondary:     $blue !default;
+$success:       $green !default;
+$info:          $cyan !default;
+$warning:       $orange !default;
+$danger:        $pink !default;
+$light:         $gray-100 !default;
+$dark:          $gray-900 !default;
+
+$monokai-bg: #2e3440;
+
+$font-family-sans-serif: Libre Franklin, sans-serif !default;
+$font-family-headings: Mulish, serif !default;
+
+$headings-font-family: $font-family-headings;
+$display-font-family: $font-family-headings;
+$headings-font-weight: 700 !default;
+
+// $font-family-sans-serif:      Mulish, sans-serif !default;
+// $font-family-serif:           Libre Franklin, sans-serif !default;  /* Not actually a serif font but whatever */
+
+$font-size-base: 1rem !default;
+
+$link-color: $red;
+$link-hover-color: $yellow;
+
+/*-- scss:rules --*/
+
+// Stop ALL CAPS in table headers
+thead th {
+  text-transform: none;
+}
+
+div.sidebar-item-container .active {
+  color: $red;
+}
+
+// Footer stuff
+.nav-footer-left {
+  text-align: left;
+}
+
+.nav-footer-right {
+  text-align: right;
+}
+
+// Temporarily hide the middle div since it has unmodifiable GitHub links as of Quarto 1.3.something: https://github.com/quarto-dev/quarto-cli/issues/5283
+.nav-footer-center {
+  display: none;
+}
+
+.nav-footer-left {
+  flex-grow: 3;
+}

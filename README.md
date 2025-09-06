@@ -1,4 +1,5 @@
 
+
 <!-- README.md is generated from README.qmd. Please edit that file -->
 
 # Consultation, Co-Optation, and Crackdown: How Participation in Authoritarian-Dominated International Organizations Shapes Civil Society
@@ -6,6 +7,7 @@
 [Andrew Heiss](https://www.andrewheiss.com) • Georgia State University
 
 <!-- badges: start -->
+
 <!-- badges: end -->
 
 ------------------------------------------------------------------------
