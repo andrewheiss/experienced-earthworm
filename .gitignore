@@ -20,6 +20,9 @@ manuscript/*.pdf.md
 manuscript/*.docx.md
 manuscript/*.odt.md
 
+# Misc stuff
+admin/*
+
 # Targets stuff
 _targets
 _targets.yaml
