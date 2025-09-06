@@ -5,6 +5,32 @@
 % For patching commands like \subtitle
 \usepackage{etoolbox}
 
+
+$if(left-aligned)$
+% -----------------------
+% Left aligned settings
+% -----------------------
+\usepackage[document]{ragged2e}
+\setlength{\RaggedRightParindent}{\parindent}
+\setlength{\RaggedRightRightskip}{0pt plus 3em}
+
+% That also affects all the captions, so this forces them to be unindented
+\AtBeginEnvironment{figure}{\setlength{\RaggedRightParindent}{0pt}}
+\AtBeginEnvironment{table}{\setlength{\RaggedRightParindent}{0pt}}
+\AtBeginEnvironment{longtable}{\setlength{\RaggedRightParindent}{0pt}}  % Longtables
+\AtBeginEnvironment{apptbl}{\setlength{\RaggedRightParindent}{0pt}}  % My custom appendix section
+\AtBeginEnvironment{tcolorbox}{\setlength{\RaggedRightParindent}{0pt}}  % Quarto callouts
+$endif$
+
+$if(endnotes)$
+% ----------
+% Endnotes
+% ----------
+\usepackage{endnotes}
+\renewcommand{\enotesize}{\normalsize}
+\let\footnote=\endnote
+$endif$
+
 % -----------------
 % Running headers
 % -----------------
@@ -30,18 +56,6 @@
 
 % Use regular heading style
 \pagestyle{normal}
-
-
-$if(epigraph)$
-% -----------
-% Epigraphs
-% -----------
-\usepackage{epigraph}
-\renewcommand{\epigraphsize}{\footnotesize}
-\setlength{\epigraphrule}{0em}
-\setlength{\beforeepigraphskip}{0em}
-\setlength{\afterepigraphskip}{1em}
-$endif$
 
 $if(biblatex)$
 % ----------
@@ -107,6 +121,13 @@ $endfor$
 % some biblatex styles (like APA) define their own \urlstyle{}
 \usepackage{url}
 \urlstyle{same}
+
+
+% Make sure math environments are always single spaced and have a little space after
+\let\oldDisplayMath=\[
+\let\endoldDisplayMath=\]
+\renewcommand{\[}{\begin{singlespace}\oldDisplayMath}
+\renewcommand{\]}{\endoldDisplayMath\end{singlespace}\vspace{\baselineskip}}
 
 % ---------------------------
 % END END-OF-PREAMBLE STUFF
