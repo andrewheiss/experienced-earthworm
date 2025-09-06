@@ -1,14 +1,24 @@
 library(targets)
 library(tarchetypes)
-library(crew)
-suppressPackageStartupMessages(library(dplyr))
+library(tibble)
+
+# Set the _targets store so that scripts in subdirectories can access targets
+# without using withr::with_dir() (see https://github.com/ropensci/targets/discussions/885)
+#
+# This hardcodes the absolute path in _targets.yaml, so to make this more
+# portable, we rewrite it every time this pipeline is run (and we don't track
+# _targets.yaml with git)
+tar_config_set(
+  store = here::here("_targets"),
+  script = here::here("_targets.R")
+)
 
 options(
   tidyverse.quiet = TRUE,
   dplyr.summarise.inform = FALSE
 )
 
-# Bayesian stuff
+# Bayes stuff
 suppressPackageStartupMessages(library(brms))
 options(
   mc.cores = 4,
@@ -20,10 +30,7 @@ set.seed(202228)  # From random.org
 
 tar_option_set(
   packages = c("tidyverse"),
-  # controller = crew_controller_local(workers = 2),  # Magical parallelization
-  format = "qs",
-  workspace_on_error = TRUE,
-  workspaces = c()
+  format = "qs"
 )
 
 # here::here() returns an absolute path, which then gets stored in tar_meta and
@@ -68,5 +75,17 @@ list(
   tar_target(m_freeexp_1, f_freeexp_1(final_data)),
   tar_target(m_civlib_1, f_civlib_1(final_data)),
 
-  NULL
+  ## Manuscript and notebook ----
+  # tar_quarto(manuscript, path = "manuscript", quiet = FALSE),
+  # tar_quarto(website, path = ".", quiet = FALSE),
+  # tar_target(deploy_script, here_rel("deploy.sh"), format = "file"),
+  # tar_target(deploy, {
+  #   # Force a dependency
+  #   website
+  #   # Run the deploy script
+  #   if (Sys.getenv("UPLOAD_WEBSITES") == "TRUE") processx::run(paste0("./", deploy_script))
+  # }),
+  
+  ## Render the README ----
+  tar_quarto(readme, here_rel("README.qmd"))
 )
